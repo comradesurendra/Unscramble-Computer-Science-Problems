@@ -1,0 +1,124 @@
+Task 0
+What is the first record of texts and what is the last record of calls?
+
+print(f"First record of texts, {texts[0][0]} texts {texts[0][1]} at time "
+      f"{texts[0][2]}.")
+
+total_calls = len(calls) - 1
+
+print(f"Last record of calls, {calls[total_calls][0]} called {calls[total_calls][1]} "
+      f"at {calls[total_calls][2]}, lasting {calls[total_calls][3]} seconds.")
+
+- Time Complexity - O(1)
+- This algorithm is constant time because has a running time independent of the input size
+
+
+Task 1
+How many different telephone numbers are there in the records?
+
+numbers = set()
+
+for text, call in zip(texts, calls):
+    for i in range(0, 2):
+        numbers.add(text[i])
+        numbers.add(call[i])
+
+print(f"There are {len(numbers)} different telephone numbers in the records.")
+
+- Time Complexity - O(n)
+ - This algorithm is linear time because even though it has two separate for-loops that 
+   are dependant on the input, each one iterating from 1 to n, these result in O(2n) which 
+   in turn, following the Big-O coefficient rule of dropping constants(coefficients in Big-O 
+   are negligible with large input sizes), result in the time complexity being simplified to O(n)
+
+
+Task 2
+Which telephone number spent the longest time on the phone during the period? Don’t forget that time spent answering a call is also time spent on the phone.
+
+from itertools import chain
+from collections import deque, defaultdict
+from datetime import datetime
+calls_dictionary = defaultdict(int)
+
+
+for caller, reciever, timestamp, duration in calls:
+    date = datetime.strptime(timestamp, "%d-%m-%Y %H:%M:%S")
+    if date.year == 2016 and date.month == 9:
+        calls_dictionary[caller] += int(duration)
+        calls_dictionary[reciever] += int(duration)
+
+template = "{} spent the longest time, {} seconds, on the phone during September 2016."
+
+
+highest_duration = max(calls_dictionary.items(), key=lambda x: x[1])
+print(template.format(*highest_duration))
+
+ - Time Complexity - O(n)
+ - This algorithm is linear time because it has one for-loop that iterates from 1 to n which 
+   results in a running time grows directly in proportion to n.
+
+
+Task 3
+The area code for fixed line telephones in Bangalore is “(080)”. Fixed line numbers include parentheses, so Bangalore numbers have the form (080)xxxxxxx.)
+
+Part A: Find all of the area codes and mobile prefixes called by people in Bangalore. - Fixed lines start with an area code enclosed in brackets. The area codes vary in length but always begin with 0. - Mobile numbers have no parentheses, but have a space in the middle of the number to help readability. The prefix of a mobile number is its first four digits, and they always start with 7, 8 or 9. - Telemarketers’ numbers have no parentheses or space, but they start with the area code 140.
+
+Part B: What percentage of calls from fixed lines in Bangalore are made to fixed lines also in Bangalore? In other words, of all the calls made from a number starting with “(080)”, what percentage of these calls were made to a number also starting with “(080)”?
+
+bangalore_calls = [call for call in calls if call[0].startswith("(080)")]
+
+bangalore_dialed = [call[1] for call in bangalore_calls]
+
+called_areas = []
+
+for call in bangalore_dialed:
+    if re.search("\(\w+\)", call):
+        called_areas.append(re.search(r'(\(.*?\))', call).group(1))
+    elif re.search(r'(^[7|8|9])', call):
+        called_areas.append(call[0:4])
+    clean_calls = sorted(list(set(called_areas)))
+    print("The numbers called by people in Bangalore have codes:")
+    for call in clean_calls:
+        print(call)
+
+total_calls = len(bangalore_calls)
+
+bangalore_to_bangalore = len([call for call in bangalore_calls if call[
+    1].startswith("(080)")])
+
+percentage = round(bangalore_to_bangalore / total_calls, 4) * 100
+
+print(f"{percentage} percent of calls from fixed lines in Bangalore are calls to other fixed lines in Bangalore.")
+
+- Time Complexity - O(nlog(n))
+- This algorithm is superlinear time because even though it has two separate for-loops that 
+   are dependant on the input, each one iterating from 1 to n, resulting in O(2n); it also has 
+   a sorting function which is 0(nlogn). Combining these two results in 0(2n + nlogn). 
+   However following the Big-O rule of dropping non-dominant terms (less dominant terms in Big-O are 
+   negligible with large input sizes), the time complexity can be simplified to O(nlog(n))
+   
+
+Task 4
+The telephone company wants to identify numbers that might be doing telephone marketing. Create a set of possible telemarketers: these are numbers that make outgoing calls but never send texts, receive texts or receive incoming calls.
+
+dials = {call[0] for call in calls}
+receives = [call[1] for call in calls]
+real_people = set()
+
+for text, receive in zip(texts, receives):
+    for i in range(0, 2):
+        real_people.add(text[i])
+    real_people.add(receive)
+
+potential_telemarketers = {call for call in dials if call not in real_people}
+potential_telemarketers = sorted(list(potential_telemarketers))
+
+print(f"These numbers could be telemarketers: {potential_telemarketers}")
+print(f"Total potential telemarketers: {len(potential_telemarketers)}")
+
+- Time Complexity - O(nlog(n))
+- This algorithm is superlinear time because even though it has two separate for-loops that 
+   are dependant on the input, each one iterating from 1 to n, resulting in O(2n); it also has 
+   a sorting function which is 0(nlogn). Combining these two results in 0(2n + nlogn). 
+   However following the Big-O rule of dropping non-dominant terms (less dominant terms in Big-O are 
+   negligible with large input sizes), the time complexity can be simplified to O(nlog(n))
